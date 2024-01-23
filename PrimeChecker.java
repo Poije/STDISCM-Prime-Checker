@@ -12,9 +12,11 @@ public class PrimeChecker {
         System.out.print("Enter the number of threads: ");
         int numThreads = scanner.nextInt();
 
+        long startTime = System.nanoTime();
         List<int[]> partitioned_List = split_range(LIMIT, numThreads);
 
         List<Integer> primes = new ArrayList<>();
+        
         Thread[] threads = new Thread[numThreads];
         for (int i = 0; i < numThreads; i++){
             int start = partitioned_List.get(i)[0];
@@ -27,7 +29,21 @@ public class PrimeChecker {
             });
             threads[i].start();
         }
-        System.out.println("Primes: " + primes);
+
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                System.out.println("Thread interrupted.  Exception: " + e.toString() +
+                        " Message: " + e.getMessage()) ;
+            }
+        }
+        
+        long endTime = System.nanoTime();
+        long elapsedTimeMillis = (endTime - startTime) / 1000000;
+        System.out.println("Runtime: " + elapsedTimeMillis + " milliseconds");
+        //System.out.println("Primes: " + primes);
+        System.out.println("Number of primes: " + primes.size());
         scanner.close();
     }
 // Function to check if a number is prime or not
