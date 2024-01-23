@@ -1,6 +1,4 @@
 import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,19 +14,20 @@ public class PrimeChecker {
 
         List<int[]> partitioned_List = split_range(LIMIT, numThreads);
 
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-
         List<Integer> primes = new ArrayList<>();
-        for (int i = 0; i<numThreads; i++){
+        Thread[] threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++){
             int start = partitioned_List.get(i)[0];
             int end = partitioned_List.get(i)[1];
-            executor.submit(() -> {
+            threads[i] = new Thread(() -> {
                 List<Integer> temp = get_primes(start, end);
-                primes.addAll(temp);
+                synchronized(primes) {
+                    primes.addAll(temp);
+                }
             });
+            threads[i].start();
         }
         System.out.println("Primes: " + primes);
-        executor.shutdown();
         scanner.close();
     }
 // Function to check if a number is prime or not
