@@ -4,15 +4,26 @@ import java.util.*;
 
 public class PrimeServer {
     public static void main(String[] args) throws IOException {
-        @SuppressWarnings("resource")
-        ServerSocket serverSocket = new ServerSocket(12345); // Server socket listening on port 12345
+        startServer(12345, "Master Server");
+        startServer(12346, "Slave Server");
+    }
+    
+    private static void startServer(int port, String serverName) {
+        new Thread(() -> {
+            try {
+                @SuppressWarnings("resource")
+                ServerSocket serverSocket = new ServerSocket(port);
+                System.out.println(serverName + " started on port " + port);
 
-        while (true) {
-            System.out.println("Server is running...");
-            Socket clientSocket = serverSocket.accept(); // Accept incoming client connections
-            Thread clientThread = new Thread(new ClientHandler(clientSocket));
-            clientThread.start();
-        }
+                while (true) {
+                    Socket clientSocket = serverSocket.accept(); // Accept incoming client connections
+                    Thread clientThread = new Thread(new ClientHandler(clientSocket));
+                    clientThread.start();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private static class ClientHandler implements Runnable {

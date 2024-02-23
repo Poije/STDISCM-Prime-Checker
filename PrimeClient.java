@@ -4,8 +4,11 @@ import java.util.*;
 
 public class PrimeClient {
     public static void main(String[] args) throws IOException {
-        Socket socket = new Socket("localhost", 12345); // Connect to server on localhost, port 12345
         Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the port number: ");
+        int port = scanner.nextInt();
+        Socket socket = new Socket("localhost", port); // Connect to server on localhost, port 12345
+        
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
