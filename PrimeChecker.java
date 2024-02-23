@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrimeChecker {
+    /*
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -45,7 +47,7 @@ public class PrimeChecker {
         //System.out.println("Primes: " + primes);
         System.out.println("Number of primes: " + primes.size());
         scanner.close();
-    }
+    } */
 // Function to check if a number is prime or not
     public static boolean check_prime(int n) {
         if (n < 2){
