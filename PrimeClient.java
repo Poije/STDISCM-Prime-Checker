@@ -19,7 +19,7 @@ public class PrimeClient {
         try {
             @SuppressWarnings("unchecked")
             List<Integer> primes = (List<Integer>) in.readObject(); // Receive primes from server
-            System.out.println("Primes: " + primes);
+            System.out.println("Number of Primes: " + primes.size());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
