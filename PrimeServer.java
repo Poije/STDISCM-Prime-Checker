@@ -99,6 +99,7 @@ public class PrimeServer {
         }
     */
 
+    // Probably have to fix this method to accomodate the seperate slave servers
         @SuppressWarnings("unchecked")
         private List<Integer> distributeSubRangeToSlave(int[] subrange) {
             try (Socket slaveSocket = new Socket("localhost", SLAVE_SERVER_PORT_1);
