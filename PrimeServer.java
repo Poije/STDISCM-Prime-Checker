@@ -25,6 +25,7 @@ public class PrimeServer {
         }
     }
 
+    // Probably have to fix this method to accomodate the seperate slave servers
     private static void startSlaveServer(int port, String serverName) {
         new Thread(() -> {
             try {
