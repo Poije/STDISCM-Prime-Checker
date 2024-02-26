@@ -16,6 +16,7 @@ public class PrimeServer {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept(); // Accept incoming client connections
+                Socket slaveSocket = serverSocket.accept(); // Accept incoming slave connections
                 Thread clientThread = new Thread(new ClientHandler(clientSocket));
                 clientThread.start();
             }
@@ -66,7 +67,7 @@ public class PrimeServer {
         }
 
         private List<Integer> distributeTask(int[] range) {
-            List<int[]> partitionedList = splitRange(range[1], 2);
+            List<int[]> partitionedList = PrimeChecker.split_range(range[1], 2);
             List<Integer> allPrimes = new ArrayList<>();
 
             for (int[] subrange : partitionedList) {
@@ -76,6 +77,8 @@ public class PrimeServer {
             return allPrimes;
         }
 
+        // use PrimeChecker.split_range(limit, numthreads) instead to split the range into subranges
+    /* 
         private List<int[]> splitRange(int limit, int numParts) {
             List<int[]> partitionedList = new ArrayList<>();
             int range = limit / numParts;
@@ -94,6 +97,7 @@ public class PrimeServer {
 
             return partitionedList;
         }
+    */
 
         @SuppressWarnings("unchecked")
         private List<Integer> distributeSubRangeToSlave(int[] subrange) {
