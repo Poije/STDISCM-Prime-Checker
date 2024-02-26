@@ -131,8 +131,9 @@ public class PrimeServer {
 
                 int[] range = (int[]) in.readObject(); // Receive range from master server
                 System.out.println("Port: " + clientSocket.getPort() + " Received range: " + Arrays.toString(range));
-                List<Integer> primes = PrimeChecker.get_primes(range[0], range[1]); // Generate primes
-                out.writeObject(primes); // Send primes back to master server
+                //List<Integer> primes = PrimeChecker.get_primes(range[0], range[1]); // Generate primes
+                
+                //out.writeObject(primes); // Send primes back to master server
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
