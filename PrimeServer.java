@@ -116,6 +116,7 @@ public class PrimeServer {
         }
     }
 
+    //Proabably have to be Similar to the ClientHandler
     private static class SlaveHandler implements Runnable {
         private final Socket clientSocket;
 
