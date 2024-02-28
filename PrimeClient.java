@@ -5,9 +5,11 @@ import java.util.*;
 public class PrimeClient {
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
+        
         System.out.print("Enter the port number: ");
-        int port = scanner.nextInt();
-        Socket socket = new Socket("localhost", port); // Connect to server on localhost, port 12345
+        int port = scanner.nextInt(); // User inputs the port number
+        
+        Socket socket = new Socket("localhost", port); // Connect to server on localhost with the user-specified port
         
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -16,8 +18,10 @@ public class PrimeClient {
         int start = scanner.nextInt(); // Define your start and end ranges here
         System.out.print("Enter the upper bound: ");
         int end = scanner.nextInt();
+        System.out.print("Enter the number of threads: ");
+        int numThreads = scanner.nextInt();
 
-        out.writeObject(new int[]{start, end}); // Send range to server
+        out.writeObject(new Object[]{new int[]{start, end}, numThreads}); // Send range and numThreads to server
 
         try {
             @SuppressWarnings("unchecked")
@@ -27,7 +31,7 @@ public class PrimeClient {
             e.printStackTrace();
         } finally {
             socket.close();
+            scanner.close();
         }
-        scanner.close();
     }
 }
