@@ -2,8 +2,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrimeChecker {
-
-    // Function to check if a number is prime or not
     public static boolean check_prime(int n) {
         if (n < 2) {
             return false;
@@ -16,7 +14,6 @@ public class PrimeChecker {
         return true;
     }
 
-    // Generate prime numbers within a given range
     public static List<Integer> get_primes(int start, int end, int numThreads) {
         List<Integer> primes = new ArrayList<>();
         List<int[]> partitioned_List = split_range(start, end, numThreads);
@@ -53,8 +50,7 @@ public class PrimeChecker {
         }
         return primes;
     }
-
-    // Split the range into numThreads parts
+    
     public static List<int[]> split_range(int start, int end, int numThreads) {
         List<int[]> ranges = new ArrayList<>();
         int range = (end - start + 1) / numThreads;
