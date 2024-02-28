@@ -6,7 +6,7 @@ public class PrimeServer {
     private static final int MASTER_SERVER_PORT = 12345;
     //private static final int SLAVE_SERVER_PORT_1 = 12346;
     //private static final int SLAVE_SERVER_PORT_2 = 12347;
-    private static final List<Integer> slavePorts = new ArrayList<>(); // Directly initialize as an empty modifiable list
+    private static final List<Integer> slavePorts = new ArrayList<>(); 
 
     public static void main(String[] args) {
         startSlaveServer("Slave Server 1");
@@ -33,7 +33,7 @@ public class PrimeServer {
                 System.out.println(serverName + " started on port " + port);
         
                 // Register the slave server's port with the master server
-                slavePorts.add(port); // Directly add to the list for simplicity in this context
+                slavePorts.add(port); 
         
                 while (true) {
                     Socket clientSocket = serverSocket.accept();
