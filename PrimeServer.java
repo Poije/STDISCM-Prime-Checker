@@ -61,14 +61,14 @@ public class PrimeServer {
                     int[] range = (int[]) receivedData[0]; // Extract range
                     int numThreads = (Integer) receivedData[1]; // Extract number of threads
         
-                    List<Integer> primes = distributeTask(range);
+                    List<Integer> primes = distributeTask(range, numThreads);
                     out.writeObject(primes);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
 
-        private List<Integer> distributeTask(int[] range) {
+        private List<Integer> distributeTask(int[] range, int numThreads) {
             int totalRange = range[1] - range[0] + 1;
             int totalServers = slavePorts.size() + 1; // +1 for the master server
             List<Integer> allPrimes = new ArrayList<>();
@@ -85,7 +85,7 @@ public class PrimeServer {
                 remainder--;
             }
             System.out.println("Master Server at port: "  + clientSocket.getLocalPort() + " received range: [" + currentStart + ", " + masterEnd + "]");
-            allPrimes.addAll(PrimeChecker.get_primes(currentStart, masterEnd));
+            allPrimes.addAll(PrimeChecker.get_primes(currentStart, masterEnd, numThreads));
             System.out.println("Master calculated primes: " + allPrimes);
         
             // Update the start for the slave servers
@@ -99,7 +99,7 @@ public class PrimeServer {
                     remainder--;
                 }
                 int[] slaveSubrange = new int[]{currentStart, slaveEnd};
-                allPrimes.addAll(distributeSubRangeToSlave(slaveSubrange, slavePort));
+                allPrimes.addAll(distributeSubRangeToSlave(slaveSubrange, slavePort, numThreads));
                 currentStart = slaveEnd + 1; // Update the start for the next slave server
             }
         
@@ -131,12 +131,12 @@ public class PrimeServer {
 
     // Probably have to fix this method to accomodate the seperate slave servers
         @SuppressWarnings("unchecked")
-        private List<Integer> distributeSubRangeToSlave(int[] subrange, int slavePort) {
+        private List<Integer> distributeSubRangeToSlave(int[] subrange, int slavePort, int numThreads) {
             try (Socket slaveSocket = new Socket("localhost", slavePort);
                  ObjectOutputStream out = new ObjectOutputStream(slaveSocket.getOutputStream());
                  ObjectInputStream in = new ObjectInputStream(slaveSocket.getInputStream())) {
         
-                out.writeObject(subrange); // Send subrange to slave server
+                out.writeObject(new Object[] {subrange, numThreads}); // Send subrange to slave server
                 return (List<Integer>) in.readObject(); // Receive primes from slave server
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -159,11 +159,13 @@ public class PrimeServer {
                  ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream())) {
     
                 // Receive range from master server
-                int[] range = (int[]) in.readObject(); 
+                Object[] receivedData = (Object[]) in.readObject();
+                int[] range = (int[]) receivedData[0]; // Extract range
+                int numThreads = (Integer) receivedData[1]; // Extract number of threads
                 System.out.println("Slave Server at port: " + clientSocket.getLocalPort() + " received range: " + Arrays.toString(range));
     
                 // Generate primes within the received range
-                List<Integer> primes = PrimeChecker.get_primes(range[0], range[1]);
+                List<Integer> primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
                 System.out.println("Slave calculated primes: " + primes);
 
     
