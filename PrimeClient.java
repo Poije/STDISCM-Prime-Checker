@@ -25,8 +25,11 @@ public class PrimeClient {
 
         try {
             @SuppressWarnings("unchecked")
-            List<Integer> primes = (List<Integer>) in.readObject(); // Receive primes from server
+            Object[] receivedData = (Object[]) in.readObject();
+            List<Integer> primes = (List<Integer>) receivedData[0]; // Receive primes from server
+            long elapsedTimeMillis = (long) receivedData[1]; // Receive elapsed time
             System.out.println("Number of Primes: " + primes.size());
+            System.out.println("Runtime: " + elapsedTimeMillis + " milliseconds");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } finally {

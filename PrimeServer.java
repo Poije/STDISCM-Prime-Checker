@@ -57,12 +57,15 @@ public class PrimeServer {
         public void run() {
             try (ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
                  ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream())) {
+                    long startTime = System.nanoTime();
                     Object[] receivedData = (Object[]) in.readObject();
                     int[] range = (int[]) receivedData[0]; // Extract range
                     int numThreads = (Integer) receivedData[1]; // Extract number of threads
         
                     List<Integer> primes = distributeTask(range, numThreads);
-                    out.writeObject(primes);
+                    long endTime = System.nanoTime();
+                    long elapsedTimeMillis = (endTime - startTime) / 1000000;
+                    out.writeObject(new Object[]{primes, elapsedTimeMillis});
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
