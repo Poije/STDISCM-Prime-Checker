@@ -11,8 +11,11 @@ public class PrimeSlave {
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         try {
             List<Integer> primes = new ArrayList<>();
-            int[] range = (int[]) in.readObject(); // Receive primes from server
-            primes = PrimeChecker.get_primes(range[0], range[1]);
+            //int[] range = (int[]) in.readObject(); // Receive primes from server
+            Object[] receivedData = (Object[]) in.readObject();
+            int[] range = (int[]) receivedData[0]; // Extract range
+            int numThreads = (Integer) receivedData[1]; // Extract number of threads
+            primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
             out.writeObject(primes);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

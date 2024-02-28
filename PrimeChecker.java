@@ -17,8 +17,35 @@ public class PrimeChecker {
     }
 
     // Generate prime numbers within a given range
-    public static List<Integer> get_primes(int start, int end) {
+    public static List<Integer> get_primes(int start, int end, int numThreads) {
         List<Integer> primes = new ArrayList<>();
+        List<int[]> partitioned_List = split_range(start, end, numThreads);
+        Thread[] threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++){
+            int[] threadRange = partitioned_List.get(i);
+            threads[i] = new Thread(() -> {
+                List<Integer> threadPrimes = thread_get_primes(threadRange[0], threadRange[1]);
+                synchronized (primes) {
+                    primes.addAll(threadPrimes);
+                }
+            });
+            threads[i].start();
+        }
+
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return primes;
+    }
+
+    public static List<Integer> thread_get_primes(int start, int end){
+        List<Integer> primes = new ArrayList<>();
+
         for (int i = start; i <= end; i++) {
             if (check_prime(i)) {
                 primes.add(i);
@@ -28,20 +55,14 @@ public class PrimeChecker {
     }
 
     // Split the range into numThreads parts
-    public static List<int[]> split_range(int LIMIT, int numThreads) {
+    public static List<int[]> split_range(int start, int end, int numThreads) {
         List<int[]> ranges = new ArrayList<>();
-        int range = LIMIT / numThreads;
-        int start = 0;
-        int end = range - 1; // Adjust for inclusive ranges
+        int range = (end - start + 1) / numThreads;
 
         for (int i = 0; i < numThreads; i++) {
-            if (i == numThreads - 1) {
-                // Ensure the last range goes up to LIMIT
-                end = LIMIT;
-            }
-            ranges.add(new int[]{start, end});
-            start = end + 1;
-            end += range;
+            int tempStart = start + i * range;
+            int tempEnd = i == numThreads - 1 ? end : tempStart + range - 1;
+            ranges.add(new int[]{tempStart, tempEnd});
         }
 
         return ranges;
