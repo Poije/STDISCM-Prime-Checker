@@ -4,13 +4,13 @@ import java.util.*;
 
 public class PrimeServer {
     private static final int MASTER_SERVER_PORT = 12345;
-    private static final int SLAVE_SERVER_PORT_1 = 12346;
-    private static final int SLAVE_SERVER_PORT_2 = 12347;
-    private static final List<Integer> slavePorts = Arrays.asList(SLAVE_SERVER_PORT_1, SLAVE_SERVER_PORT_2);
+    //private static final int SLAVE_SERVER_PORT_1 = 12346;
+    //private static final int SLAVE_SERVER_PORT_2 = 12347;
+    private static final List<Integer> slavePorts = new ArrayList<>(); // Directly initialize as an empty modifiable list
 
     public static void main(String[] args) {
-        startSlaveServer(SLAVE_SERVER_PORT_1, "Slave Server 1");
-        startSlaveServer(SLAVE_SERVER_PORT_2, "Slave Server 2");
+        startSlaveServer("Slave Server 1");
+        startSlaveServer("Slave Server 2");
 
         try (ServerSocket serverSocket = new ServerSocket(MASTER_SERVER_PORT)) {
             System.out.println("Master Server started on port " + MASTER_SERVER_PORT);
@@ -26,15 +26,17 @@ public class PrimeServer {
     }
 
     // Probably have to fix this method to accomodate the seperate slave servers
-    private static void startSlaveServer(int port, String serverName) {
+    private static void startSlaveServer(String serverName) {
         new Thread(() -> {
-            try {
-                @SuppressWarnings("resource")
-                ServerSocket serverSocket = new ServerSocket(port);
+            try (ServerSocket serverSocket = new ServerSocket(0)) { // Dynamically allocate a port
+                int port = serverSocket.getLocalPort();
                 System.out.println(serverName + " started on port " + port);
-
+        
+                // Register the slave server's port with the master server
+                slavePorts.add(port); // Directly add to the list for simplicity in this context
+        
                 while (true) {
-                    Socket clientSocket = serverSocket.accept(); // Accept incoming client connections
+                    Socket clientSocket = serverSocket.accept();
                     Thread clientThread = new Thread(new SlaveHandler(clientSocket));
                     clientThread.start();
                 }
