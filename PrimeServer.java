@@ -86,6 +86,7 @@ public class PrimeServer {
             }
             System.out.println("Master Server at port: "  + clientSocket.getLocalPort() + " received range: [" + currentStart + ", " + masterEnd + "]");
             allPrimes.addAll(PrimeChecker.get_primes(currentStart, masterEnd));
+            System.out.println("Master calculated primes: " + allPrimes);
         
             // Update the start for the slave servers
             currentStart = masterEnd + 1;
@@ -163,6 +164,8 @@ public class PrimeServer {
     
                 // Generate primes within the received range
                 List<Integer> primes = PrimeChecker.get_primes(range[0], range[1]);
+                System.out.println("Slave calculated primes: " + primes);
+
     
                 // Send primes back to master server
                 out.writeObject(primes); 
