@@ -120,7 +120,21 @@ public class PrimeServer {
     // Probably have to fix this method to accomodate the seperate slave servers
         @SuppressWarnings("unchecked")
         private List<Integer> distributeSubRangeToSlave(int[] subrange, int slavePort, int numThreads) {
-            try (Socket slaveSocket = new Socket("localhost", slavePort);
+            List<Integer> primes = new ArrayList<>();
+            try (ServerSocket masterSocket = new ServerSocket(12346)){
+                System.out.println("Slave Server started on port 12346");
+                while (true) {
+                    Socket slaveSocket = masterSocket.accept();
+                    System.out.println("Connected to Slave Server");
+                    new Thread(new SlaveHandler(slaveSocket, subrange, numThreads)).start();
+                    return primes;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return primes;
+            }
+
+            /*try (Socket slaveSocket = new Socket("localhost", slavePort);
                  ObjectOutputStream out = new ObjectOutputStream(slaveSocket.getOutputStream());
                  ObjectInputStream in = new ObjectInputStream(slaveSocket.getInputStream())) {
         
@@ -130,7 +144,7 @@ public class PrimeServer {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
                 return new ArrayList<>(); 
-            }
+            } */
         }
 
         private void sendCompressedData(Object data, Socket socket) {
@@ -153,26 +167,25 @@ public class PrimeServer {
 
     //Proabably have to be Similar to the ClientHandler
     private static class SlaveHandler implements Runnable {
-        private final Socket clientSocket;
+        private final Socket slaveSocket;
+        private final int[] range;
+        private final int numThreads;
     
-        public SlaveHandler(Socket clientSocket) {
-            this.clientSocket = clientSocket;
+        public SlaveHandler(Socket slaveSocket, int[] range, int numThreads) {
+            this.slaveSocket = slaveSocket;
+            this.range = range;
+            this.numThreads = numThreads;
         }
     
         @Override
         public void run() {
-            try (ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                 ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream())) {
-    
-                Object[] receivedData = (Object[]) in.readObject();
-                int[] range = (int[]) receivedData[0]; 
-                int numThreads = (Integer) receivedData[1]; 
-                System.out.println("Slave Server at port: " + clientSocket.getLocalPort() + " received range: " + Arrays.toString(range));
-    
-                List<Integer> primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
+            try (ObjectInputStream in = new ObjectInputStream(slaveSocket.getInputStream());
+                 ObjectOutputStream out = new ObjectOutputStream(slaveSocket.getOutputStream())) {
+                    
+                out.writeObject(new Object[] {range, numThreads});
                 // System.out.println("Slave calculated primes: " + primes);
-
-                out.writeObject(primes); 
+                @SuppressWarnings("unchecked")
+                List<Integer> primes = (List<Integer>) in.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

@@ -3,47 +3,33 @@ import java.net.*;
 import java.util.*;
 
 public class PrimeSlave {
-    public static void main(String[] args) throws IOException {
-        try(ServerSocket serverSocket = new ServerSocket(12346)) {
-            System.out.println("Slave Server started on port 12346");
-            while (true) {
-                Socket MasterSocket = serverSocket.accept();
-                System.out.println("Connected to Master Server");
-                new Thread(new SlaveHandler(MasterSocket)).start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    public static void main(String[] args) throws IOException, InterruptedException {
+        boolean connected = false;
+        while (!connected) {
+            try {
+                Socket socket = new Socket("localhost", 12346); // Connect to server on localhost, port 12346
+                System.out.println("Slave Connected to Server...");
+                connected = true;
 
-    private static class SlaveHandler implements Runnable {
-        private final Socket clientSocket;
-
-        public SlaveHandler(Socket clientSocket) {
-            this.clientSocket = clientSocket;
-        }
-
-        @Override
-        public void run() {
-            try (ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                 ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream())) {
-                Object[] data = (Object[]) in.readObject();
-                int[] bounds = (int[]) data[0];
-                int numThreads = (int) data[1];
-
-                List<Integer> primes = new ArrayList<>();
-                long startTime = System.nanoTime();
-
-                System.out.println("Calculating primes from " + bounds[0] + " to " + bounds[1]);
-                primes = PrimeChecker.get_primes(bounds[0], bounds[1], numThreads);
-
-                long endTime = System.nanoTime();
-                long elapsedTimeMillis = (endTime - startTime) / 1000000;
-                System.out.println("Elapsed Time: " + elapsedTimeMillis);
-                out.writeObject(primes);
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                try {
+                    List<Integer> primes = new ArrayList<>();
+                    Object[] data = (Object[]) in.readObject();
+                    int[] range = (int[]) data[0];
+                    int numThreads = (int) data[1];
+                    primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
+                    System.out.println("Slave calculated primes: " + primes);
+                    out.writeObject(primes);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    socket.close();
+                }
+            } catch (ConnectException e) {
+                Thread.sleep(1000); // Wait for 5 seconds before retrying
             }
         }
     }
 }
+
