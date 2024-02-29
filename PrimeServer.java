@@ -9,18 +9,17 @@ public class PrimeServer {
     //private static final List<Integer> slavePorts = Collections.synchronizedList(new ArrayList<>());
     private static ExecutorService clientExecutor;
     private static ExecutorService slaveExecutor;
+    public static int numSlaves = 0;
     
     public static void main(String[] args) {
         clientExecutor = Executors.newCachedThreadPool(); 
         slaveExecutor = Executors.newFixedThreadPool(2); 
 
-        //startSlaveServer("Slave Server 1");
-        //startSlaveServer("Slave Server 2");
         Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Number of Slaves: ");
+        numSlaves = scanner.nextInt();
         try (ServerSocket serverSocket = new ServerSocket(MASTER_SERVER_PORT)) {
             System.out.println("Master Server started on port " + MASTER_SERVER_PORT);
-            //System.out.print("Enter Port of the Slaves: ");
-            //scanner.nextInt();
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -34,25 +33,7 @@ public class PrimeServer {
         }
         scanner.close();
     }
-/*
-    private static void startSlaveServer(String serverName) {
-        slaveExecutor.submit(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(0)) {
-                int port = serverSocket.getLocalPort();
-                synchronized (slavePorts) {
-                    slavePorts.add(port);
-                }
-                System.out.println(serverName + " started on port " + port);
 
-                while (true) {
-                    Socket clientSocket = serverSocket.accept();
-                    new Thread(new SlaveHandler(clientSocket)).start();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    } */
 
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
@@ -85,7 +66,7 @@ public class PrimeServer {
 
         private List<Integer> distributeTask(int[] range, int numThreads) {
             int totalRange = range[1] - range[0] + 1;
-            int totalServers = 1 + 1; 
+            int totalServers = numSlaves + 1; 
             List<Integer> allPrimes = new ArrayList<>();
         
             int subrangeSize = totalRange / totalServers;
@@ -103,7 +84,7 @@ public class PrimeServer {
         
             currentStart = masterEnd + 1;
         
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < numSlaves; i++) {
                 int slaveEnd = currentStart + subrangeSize - 1;
                 if (remainder > 0) {
                     slaveEnd += 1;
@@ -133,18 +114,6 @@ public class PrimeServer {
                 e.printStackTrace();
                 return primes;
             }
-
-            /*try (Socket slaveSocket = new Socket("localhost", slavePort);
-                 ObjectOutputStream out = new ObjectOutputStream(slaveSocket.getOutputStream());
-                 ObjectInputStream in = new ObjectInputStream(slaveSocket.getInputStream())) {
-        
-                out.writeObject(new Object[] {subrange, numThreads}); 
-
-                return (List<Integer>) in.readObject(); 
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-                return new ArrayList<>(); 
-            } */
         }
 
         private void sendCompressedData(Object data, Socket socket) {
@@ -189,6 +158,10 @@ public class PrimeServer {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+
+        public List<Integer> getPrimes() {
+            return PrimeChecker.get_primes(range[0], range[1], numThreads);
         }
     }
 }
