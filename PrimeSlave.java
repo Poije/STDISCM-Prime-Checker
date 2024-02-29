@@ -5,6 +5,7 @@ import java.util.*;
 public class PrimeSlave {
     public static void main(String[] args) throws IOException {
         try(ServerSocket serverSocket = new ServerSocket(12346)) {
+            System.out.println("Slave Server started on port 12346");
             while (true) {
                 Socket MasterSocket = serverSocket.accept();
                 System.out.println("Connected to Master Server");

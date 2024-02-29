@@ -9,16 +9,18 @@ public class PrimeServer {
     //private static final List<Integer> slavePorts = Collections.synchronizedList(new ArrayList<>());
     private static ExecutorService clientExecutor;
     private static ExecutorService slaveExecutor;
-
+    
     public static void main(String[] args) {
         clientExecutor = Executors.newCachedThreadPool(); 
         slaveExecutor = Executors.newFixedThreadPool(2); 
 
         //startSlaveServer("Slave Server 1");
         //startSlaveServer("Slave Server 2");
-
+        Scanner scanner = new Scanner(System.in);
         try (ServerSocket serverSocket = new ServerSocket(MASTER_SERVER_PORT)) {
             System.out.println("Master Server started on port " + MASTER_SERVER_PORT);
+            //System.out.print("Enter Port of the Slaves: ");
+            //scanner.nextInt();
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -30,6 +32,7 @@ public class PrimeServer {
             clientExecutor.shutdown();
             slaveExecutor.shutdown();
         }
+        scanner.close();
     }
 /*
     private static void startSlaveServer(String serverName) {
