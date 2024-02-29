@@ -4,6 +4,7 @@ import java.util.*;
 
 public class PrimeSlave {
     public static void main(String[] args) throws IOException, InterruptedException {
+        System.out.println("Slave Started...");
         boolean connected = false;
         while (!connected) {
             try {
@@ -19,7 +20,7 @@ public class PrimeSlave {
                     int[] range = (int[]) data[0];
                     int numThreads = (int) data[1];
                     primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
-                    System.out.println("Slave calculated primes: " + primes);
+                    //System.out.println("Slave calculated primes: " + primes);
                     out.writeObject(primes);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
@@ -27,7 +28,7 @@ public class PrimeSlave {
                     socket.close();
                 }
             } catch (ConnectException e) {
-                Thread.sleep(1000); // Wait for 5 seconds before retrying
+                Thread.sleep(1000); // Wait for 1 second before retrying
             }
         }
     }
