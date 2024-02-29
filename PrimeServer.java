@@ -6,7 +6,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class PrimeServer {
     private static final int MASTER_SERVER_PORT = 12345;
-    private static final List<Integer> slavePorts = Collections.synchronizedList(new ArrayList<>());
+    //private static final List<Integer> slavePorts = Collections.synchronizedList(new ArrayList<>());
     private static ExecutorService clientExecutor;
     private static ExecutorService slaveExecutor;
 
@@ -14,8 +14,8 @@ public class PrimeServer {
         clientExecutor = Executors.newCachedThreadPool(); 
         slaveExecutor = Executors.newFixedThreadPool(2); 
 
-        startSlaveServer("Slave Server 1");
-        startSlaveServer("Slave Server 2");
+        //startSlaveServer("Slave Server 1");
+        //startSlaveServer("Slave Server 2");
 
         try (ServerSocket serverSocket = new ServerSocket(MASTER_SERVER_PORT)) {
             System.out.println("Master Server started on port " + MASTER_SERVER_PORT);
@@ -31,7 +31,7 @@ public class PrimeServer {
             slaveExecutor.shutdown();
         }
     }
-
+/*
     private static void startSlaveServer(String serverName) {
         slaveExecutor.submit(() -> {
             try (ServerSocket serverSocket = new ServerSocket(0)) {
@@ -49,7 +49,7 @@ public class PrimeServer {
                 e.printStackTrace();
             }
         });
-    }
+    } */
 
     private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
@@ -82,7 +82,7 @@ public class PrimeServer {
 
         private List<Integer> distributeTask(int[] range, int numThreads) {
             int totalRange = range[1] - range[0] + 1;
-            int totalServers = slavePorts.size() + 1; 
+            int totalServers = 1 + 1; 
             List<Integer> allPrimes = new ArrayList<>();
         
             int subrangeSize = totalRange / totalServers;
@@ -100,14 +100,14 @@ public class PrimeServer {
         
             currentStart = masterEnd + 1;
         
-            for (int slavePort : slavePorts) {
+            for (int i = 0; i < 1; i++) {
                 int slaveEnd = currentStart + subrangeSize - 1;
                 if (remainder > 0) {
                     slaveEnd += 1;
                     remainder--;
                 }
                 int[] slaveSubrange = new int[]{currentStart, slaveEnd};
-                allPrimes.addAll(distributeSubRangeToSlave(slaveSubrange, slavePort, numThreads));
+                allPrimes.addAll(distributeSubRangeToSlave(slaveSubrange, 12346, numThreads));
                 currentStart = slaveEnd + 1; 
             }
         
@@ -122,6 +122,7 @@ public class PrimeServer {
                  ObjectInputStream in = new ObjectInputStream(slaveSocket.getInputStream())) {
         
                 out.writeObject(new Object[] {subrange, numThreads}); 
+
                 return (List<Integer>) in.readObject(); 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
