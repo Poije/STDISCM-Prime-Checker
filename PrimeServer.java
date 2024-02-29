@@ -10,6 +10,7 @@ public class PrimeServer {
     private static ExecutorService clientExecutor;
     private static ExecutorService slaveExecutor;
     public static int numSlaves = 0;
+    public static  List<Integer> allPrimes = new ArrayList<>();
     
     public static void main(String[] args) {
         clientExecutor = Executors.newCachedThreadPool(); 
@@ -67,8 +68,8 @@ public class PrimeServer {
         private List<Integer> distributeTask(int[] range, int numThreads) {
             int totalRange = range[1] - range[0] + 1;
             int totalServers = numSlaves + 1; 
-            List<Integer> allPrimes = new ArrayList<>();
-        
+            List<Integer> allPrimes_temp = new ArrayList<>();
+
             int subrangeSize = totalRange / totalServers;
             int remainder = totalRange % totalServers;
             int currentStart = range[0];
@@ -91,28 +92,25 @@ public class PrimeServer {
                     remainder--;
                 }
                 int[] slaveSubrange = new int[]{currentStart, slaveEnd};
-                allPrimes.addAll(distributeSubRangeToSlave(slaveSubrange, 12346, numThreads));
+                distributeSubRangeToSlave(slaveSubrange, 12346, numThreads);
                 currentStart = slaveEnd + 1; 
             }
-        
-            return allPrimes;
+
+            allPrimes_temp.addAll(allPrimes);
+            System.out.println("All Primes: " + allPrimes_temp);
+            return allPrimes_temp;
         }
 
     // Probably have to fix this method to accomodate the seperate slave servers
-        @SuppressWarnings("unchecked")
-        private List<Integer> distributeSubRangeToSlave(int[] subrange, int slavePort, int numThreads) {
-            List<Integer> primes = new ArrayList<>();
+        
+        private void distributeSubRangeToSlave(int[] subrange, int slavePort, int numThreads) {
             try (ServerSocket masterSocket = new ServerSocket(12346)){
                 System.out.println("Slave Server started on port 12346");
-                while (true) {
-                    Socket slaveSocket = masterSocket.accept();
-                    System.out.println("Connected to Slave Server");
-                    new Thread(new SlaveHandler(slaveSocket, subrange, numThreads)).start();
-                    return primes;
-                }
+                Socket slaveSocket = masterSocket.accept();
+                System.out.println("Connected to Slave Server");
+                new Thread(new SlaveHandler(slaveSocket, subrange, numThreads)).start();
             } catch (IOException e) {
                 e.printStackTrace();
-                return primes;
             }
         }
 
@@ -155,13 +153,10 @@ public class PrimeServer {
                 // System.out.println("Slave calculated primes: " + primes);
                 @SuppressWarnings("unchecked")
                 List<Integer> primes = (List<Integer>) in.readObject();
+                allPrimes.addAll(primes);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        }
-
-        public List<Integer> getPrimes() {
-            return PrimeChecker.get_primes(range[0], range[1], numThreads);
         }
     }
 }

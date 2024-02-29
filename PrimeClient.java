@@ -26,6 +26,7 @@ public class PrimeClient {
 
         try {
             Object[] receivedData = (Object[]) receiveAndDecompressData(socket);
+            @SuppressWarnings("unchecked")
             List<Integer> primes = (List<Integer>) receivedData[0];
             long startTime = (long) receivedData[1];
 
