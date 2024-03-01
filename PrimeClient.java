@@ -13,6 +13,7 @@ public class PrimeClient {
         Socket socket = new Socket("localhost", port);
         
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
         System.out.print("Enter the lower bound: ");
         int start = scanner.nextInt();
