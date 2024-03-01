@@ -9,7 +9,7 @@ public class PrimeSlave {
         boolean connected = false;
         while (!connected) {
             try {
-                Socket socket = new Socket("localhost", 12346); // Connect to server on localhost, port 12346
+                Socket socket = new Socket("192.168.117.1", 12346); // Connect to server on localhost, port 12346
                 System.out.println("Slave Connected to Server...");
                 connected = true;
 

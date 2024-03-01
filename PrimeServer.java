@@ -8,17 +8,13 @@ import java.util.zip.GZIPOutputStream;
 
 public class PrimeServer {
     private static final int MASTER_SERVER_PORT = 12345;
-    //private static final List<Integer> slavePorts = Collections.synchronizedList(new ArrayList<>());
     private static ExecutorService clientExecutor;
-    private static ExecutorService slaveExecutor;
     public static int numSlaves = 0;
     public static  List<Integer> allPrimes = new ArrayList<>();
     public static int DoneCounter = 0;
     
     public static void main(String[] args) {
         clientExecutor = Executors.newCachedThreadPool(); 
-        slaveExecutor = Executors.newFixedThreadPool(2); 
-
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Number of Slaves: ");
         numSlaves = scanner.nextInt();
@@ -33,7 +29,6 @@ public class PrimeServer {
             e.printStackTrace();
         } finally {
             clientExecutor.shutdown();
-            slaveExecutor.shutdown();
         }
         scanner.close();
     }
