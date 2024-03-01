@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class PrimeServer {
@@ -171,7 +173,12 @@ public class PrimeServer {
                     
                 out.writeObject(new Object[] {range, numThreads});
                 @SuppressWarnings("unchecked")
-                List<Integer> primes = (List<Integer>) in.readObject();
+                Object[] receivedData = (Object[]) receiveAndDecompressData(slaveSocket);
+                List<Integer> primes = Arrays.stream(receivedData)
+                                            .filter(obj -> obj instanceof Integer)
+                                            .map(obj -> (Integer) obj)
+                                            .collect(Collectors.toList());
+
                 System.out.println("Slave calculated primes: " + primes.size());
                 allPrimes.addAll(primes);
                 DoneCounter++;
@@ -179,5 +186,25 @@ public class PrimeServer {
                 e.printStackTrace();
             }
         }
+
+        private static Object receiveAndDecompressData(Socket socket) throws ClassNotFoundException {
+        try {
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            int length = dis.readInt();
+            if (length > 0) {
+                byte[] compressedData = new byte[length];
+                dis.readFully(compressedData, 0, compressedData.length);
+    
+                try (ByteArrayInputStream byteStream = new ByteArrayInputStream(compressedData);
+                     GZIPInputStream gzipIn = new GZIPInputStream(byteStream);
+                     ObjectInputStream objectIn = new ObjectInputStream(gzipIn)) {
+                    return objectIn.readObject();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     }
 }

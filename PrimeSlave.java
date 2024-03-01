@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 public class PrimeSlave {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -21,7 +22,8 @@ public class PrimeSlave {
                     int numThreads = (int) data[1];
                     primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
                     System.out.println("Slave calculated primes: " + primes.size());
-                    out.writeObject(primes);
+                    sendCompressedData(new Object[]{primes}, socket);
+                    // out.writeObject(primes);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 } finally {
@@ -32,5 +34,22 @@ public class PrimeSlave {
             }
         }
     }
+
+    private static void sendCompressedData(Object data, Socket socket) {
+            try {
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                try (GZIPOutputStream gzipOut = new GZIPOutputStream(byteStream);
+                    ObjectOutputStream objectOut = new ObjectOutputStream(gzipOut)) {
+                    objectOut.writeObject(data);
+                } 
+
+                byte[] compressedData = byteStream.toByteArray();
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                dos.writeInt(compressedData.length);
+                dos.write(compressedData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 }
 
