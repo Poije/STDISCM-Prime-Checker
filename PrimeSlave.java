@@ -8,7 +8,7 @@ public class PrimeSlave {
         boolean connected = false;
         while (!connected) {
             try {
-                Socket socket = new Socket("192.168.117.33", 12346); // Connect to server on localhost, port 12346
+                Socket socket = new Socket("localhost", 12346); // Connect to server on localhost, port 12346
                 System.out.println("Slave Connected to Server...");
                 connected = true;
 
@@ -20,7 +20,7 @@ public class PrimeSlave {
                     int[] range = (int[]) data[0];
                     int numThreads = (int) data[1];
                     primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
-                    System.out.println("Slave calculated primes: " + primes);
+                    System.out.println("Slave calculated primes: " + primes.size());
                     out.writeObject(primes);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
