@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 public class PrimeSlave {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -8,7 +9,7 @@ public class PrimeSlave {
         boolean connected = false;
         while (!connected) {
             try {
-                Socket socket = new Socket("192.168.117.33", 12346); // Connect to server on localhost, port 12346
+                Socket socket = new Socket("localhost", 12346); // Connect to server on localhost, port 12346
                 System.out.println("Slave Connected to Server...");
                 connected = true;
 
@@ -20,8 +21,9 @@ public class PrimeSlave {
                     int[] range = (int[]) data[0];
                     int numThreads = (int) data[1];
                     primes = PrimeChecker.get_primes(range[0], range[1], numThreads);
-                    System.out.println("Slave calculated primes: " + primes);
-                    out.writeObject(primes);
+                    System.out.println("Slave calculated primes: " + primes.size());
+                    sendCompressedData(new Object[]{primes}, socket);
+                    // out.writeObject(primes);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 } finally {
@@ -32,5 +34,22 @@ public class PrimeSlave {
             }
         }
     }
+
+    private static void sendCompressedData(Object data, Socket socket) {
+            try {
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                try (GZIPOutputStream gzipOut = new GZIPOutputStream(byteStream);
+                    ObjectOutputStream objectOut = new ObjectOutputStream(gzipOut)) {
+                    objectOut.writeObject(data);
+                } 
+
+                byte[] compressedData = byteStream.toByteArray();
+                DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                dos.writeInt(compressedData.length);
+                dos.write(compressedData);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 }
 
