@@ -11,6 +11,7 @@ public class PrimeServer {
     private static ExecutorService slaveExecutor;
     public static int numSlaves = 0;
     public static  List<Integer> allPrimes = new ArrayList<>();
+    public static int DoneCounter = 0;
     
     public static void main(String[] args) {
         clientExecutor = Executors.newCachedThreadPool(); 
@@ -95,7 +96,14 @@ public class PrimeServer {
                 distributeSubRangeToSlave(slaveSubrange, 12346, numThreads);
                 currentStart = slaveEnd + 1; 
             }
-
+            
+            while (DoneCounter < numSlaves) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             allPrimes_temp.addAll(allPrimes);
             System.out.println("All Primes: " + allPrimes_temp);
             return allPrimes_temp;
@@ -154,6 +162,7 @@ public class PrimeServer {
                 @SuppressWarnings("unchecked")
                 List<Integer> primes = (List<Integer>) in.readObject();
                 allPrimes.addAll(primes);
+                DoneCounter++;
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
