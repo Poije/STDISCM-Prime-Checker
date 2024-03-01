@@ -169,10 +169,11 @@ public class PrimeServer {
                 out.writeObject(new Object[] {range, numThreads});
                 @SuppressWarnings("unchecked")
                 Object[] receivedData = (Object[]) receiveAndDecompressData(slaveSocket);
-                List<Integer> primes = Arrays.stream(receivedData)
+                List<Integer> primes = (List<Integer>) receivedData[0];
+                /*List<Integer> primes = Arrays.stream(receivedData)
                                             .filter(obj -> obj instanceof Integer)
                                             .map(obj -> (Integer) obj)
-                                            .collect(Collectors.toList());
+                                            .collect(Collectors.toList());*/
 
                 System.out.println("Slave calculated primes: " + primes.size());
                 allPrimes.addAll(primes);
